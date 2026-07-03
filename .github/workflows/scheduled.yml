@@ -45,7 +45,7 @@ jobs:
           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
           
-          TARGET_LOCATION: ${{ env.TARGET_LOCATION }}
-          TWILIO_PHONE_NUMBER: ${{ env.TWILIO_PHONE_NUMBER }}
-          TARGET_NUMBER: ${{ env.TARGET_NUMBER }}
+          TARGET_LOCATION: ${{ vars.TARGET_LOCATION }}
+          TWILIO_PHONE_NUMBER: ${{ vars.TWILIO_PHONE_NUMBER }}
+          TARGET_NUMBER: ${{ vars.TARGET_NUMBER }}
         run: python main.py
