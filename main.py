@@ -1,49 +1,44 @@
-import smtplib
-import datetime as dt
-import pandas as pd
 import os
-import random
+import requests
+from twilio.rest import Client
 
-LETTERS_PATH = "./letter_templates"
+OWM_API_ENDPOINT = "https://api.openweathermap.org/data/2.5/forecast"
+FORECAST_COUNT = 4
+LAST_RAIN_ID = 531
 
-MY_EMAIL = os.environ.get("MY_EMAIL")
-PASSWORD = os.environ.get("MY_PASSWORD")
+OWM_API_KEY = os.environ.get("OWM_API_KEY")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 
-def get_list_of_files():
-    return os.listdir(LETTERS_PATH)
+TARGET_LOCATION = os.environ.get("TARGET_LOCATION")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER")
+TARGET_NUMBER = os.environ.get("TARGET_NUMBER")
 
-def get_random_letter():
-    list_of_letters = get_list_of_files()
-    letter_name = random.choice(list_of_letters)
-    with open(f"{LETTERS_PATH}/{letter_name}", mode="r") as file:
-        file_content = file.read()
-    return file_content
+params = {
+    "q": TARGET_LOCATION,
+    "appid": OWM_API_KEY,
+    "cnt": FORECAST_COUNT,
+}
 
-def prepare_message(name):
-    letter = get_random_letter()
-    letter = letter.replace("[NAME]", name)
-    return letter
+response = requests.get(OWM_API_ENDPOINT, params=params)
+response.raise_for_status()
 
-# Get the birthdays data
-birthdays_df = pd.read_csv("birthdays.csv")
-birthdays_dict = {(row.month, row.day) : row for index, row in birthdays_df.iterrows()}
+data = response.json()
+forecast_list = data["list"]
 
-# Check if today matches a birthday in the birthdays.csv
-now = dt.datetime.now()
-today = (now.month, now.day)
-if today in birthdays_dict:
+f_will_rain = False
+for forecast_dict_entry in forecast_list:
+    weather_id = forecast_dict_entry["weather"][0]["id"]
+    if int(weather_id) <= LAST_RAIN_ID:
+        f_will_rain = True
 
-    # Get the jubilarian data and prepare the message
-    jubilarian_address = birthdays_dict[today].email
-    jubilarian_name = birthdays_dict[today]["name"]
-    message = prepare_message(jubilarian_name)
-
-    # Send the email
-    with smtplib.SMTP("smtp.gmail.com") as connection:
-        connection.starttls()
-        connection.login(user=MY_EMAIL, password=PASSWORD)
-        connection.sendmail(from_addr=MY_EMAIL, to_addrs=jubilarian_address, msg=f"Subject:Happy Birthday!\n\n{message}")
-
-
-
-
+if f_will_rain:
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    message = client.messages.create(
+        body="It's going to rain today. Remember to bring an umbrella!.",
+        from_=TWILIO_PHONE_NUMBER,
+        to=TARGET_NUMBER,
+    )
+    print(message.sid)
+    print(message.status)
+    
