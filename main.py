@@ -46,7 +46,7 @@ if f_will_rain:
     print(message.status)
     
     if DEBUG:
-        time.sleep(1000)
+        time.sleep(10)
 
         msg = client.messages(message.sid).fetch()
 
