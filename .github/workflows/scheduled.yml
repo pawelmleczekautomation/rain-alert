@@ -44,4 +44,8 @@ jobs:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          
+          TARGET_LOCATION: ${{ env.TARGET_LOCATION }}
+          TWILIO_PHONE_NUMBER: ${{ env.TWILIO_PHONE_NUMBER }}
+          TARGET_NUMBER: ${{ env.TARGET_NUMBER }}
         run: python main.py
