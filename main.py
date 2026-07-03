@@ -2,6 +2,8 @@ import os
 import requests
 from twilio.rest import Client
 
+DEBUG = True
+
 OWM_API_ENDPOINT = "https://api.openweathermap.org/data/2.5/forecast"
 FORECAST_COUNT = 4
 LAST_RAIN_ID = 531
@@ -41,4 +43,17 @@ if f_will_rain:
     )
     print(message.sid)
     print(message.status)
+    
+    if DEBUG:
+        time.sleep(1000)
+
+        msg = client.messages(message.sid).fetch()
+
+        print("Status:", msg.status)
+        print("Error code:", msg.error_code)
+        print("Error message:", msg.error_message)
+
+        print(TWILIO_PHONE_NUMBER)
+        print(TARGET_NUMBER)
+
     
